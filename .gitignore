@@ -1,0 +1,20 @@
+.env
+data/*
+!data/.gitkeep
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+*.db
+*.db-wal
+*.db-shm
+web/node_modules/
+# proxy/static is the built dashboard and is committed on purpose, so Python-only users need no Node.
+
+# leftovers from the old Streamlit dashboard and previous UI builds (safe to delete)
+dashboard/
+Dockerfile.dashboard
+.streamlit/
+proxy/static/assets/index-DSmcXmks.js
+proxy/static/assets/index-EfrcLL_C.css

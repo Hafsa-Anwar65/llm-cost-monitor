@@ -1,0 +1,21 @@
+services:
+  monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile.proxy
+    ports:
+      - "127.0.0.1:8000:8000"   # localhost only; there is no auth on the proxy or the dashboard
+    environment:
+      DB_PATH: /data/monitor.db
+      PRICING_PATH: /app/pricing.json
+      DAILY_BUDGET_USD: ${DAILY_BUDGET_USD:-}
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
+      LOG_PROMPTS: ${LOG_PROMPTS:-0}
+      INJECT_OPENAI_USAGE: ${INJECT_OPENAI_USAGE:-1}
+    volumes:
+      - monitor-data:/data
+      - ./pricing.json:/app/pricing.json:ro   # edit prices without rebuilding
+    restart: unless-stopped
+
+volumes:
+  monitor-data:

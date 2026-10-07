@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LLM Cost Monitor</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236d3fe0'/%3E%3Cpath d='M8 22v-7M14 22V9M20 22v-5M26 22V12' stroke='%23c6f432' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E"
+    />
+    <script>
+      // Apply a saved theme before first paint so there is no flash.
+      try {
+        var t = localStorage.getItem('lcm-theme')
+        document.documentElement.dataset.theme = t === 'light' ? 'light' : 'dark'
+      } catch (e) {
+        document.documentElement.dataset.theme = 'dark'
+      }
+    </script>
+    <script type="module" crossorigin src="/dashboard/assets/index-DUAzG0G6.js"></script>
+    <link rel="stylesheet" crossorigin href="/dashboard/assets/index-CdUlZJXo.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

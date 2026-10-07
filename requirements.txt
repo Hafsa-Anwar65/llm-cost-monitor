@@ -1,0 +1,5 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+httpx>=0.27
+# Time-zone database for the dashboard; Windows ships without one.
+tzdata>=2024.1
