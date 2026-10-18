@@ -13,15 +13,35 @@ const base: SVGProps<SVGSVGElement> = {
 }
 
 export const Logo = () => (
-  <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+  <svg className="logo" width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
     <defs>
-      <linearGradient id="logo-g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stopColor="#a78bfa" />
-        <stop offset="1" stopColor="#6d3fe0" />
+      <linearGradient id="logo-bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor="#8b5cff" />
+        <stop offset="1" stopColor="#4b1fd1" />
+      </linearGradient>
+      <linearGradient id="logo-arc" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stopColor="#3ac7ff" />
+        <stop offset="1" stopColor="#c6f432" />
       </linearGradient>
     </defs>
-    <circle cx="16" cy="16" r="16" fill="url(#logo-g)" />
-    <path d="M10 21v-5M16 21V11M22 21v-8" stroke="#c6f432" strokeWidth="3" strokeLinecap="round" />
+    <rect width="32" height="32" rx="9" fill="url(#logo-bg)" />
+    <path d="M7.5 21.5a8.5 8.5 0 0 1 17 0" fill="none" stroke="#fff" strokeOpacity=".22" strokeWidth="3" strokeLinecap="round" />
+    <path d="M7.5 21.5a8.5 8.5 0 0 1 14.51-6.01" fill="none" stroke="url(#logo-arc)" strokeWidth="3" strokeLinecap="round" />
+    <path d="M16 21.5l4-4" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
+    <circle cx="16" cy="21.5" r="2" fill="#fff" />
+  </svg>
+)
+
+export const IconShield = () => (
+  <svg {...base}>
+    <path d="M8 1.8l5.2 2v4c0 3.2-2.2 5.4-5.2 6.4-3-1-5.2-3.2-5.2-6.4v-4L8 1.8z" />
+    <path d="M5.6 8.1l1.7 1.7 3.2-3.4" />
+  </svg>
+)
+
+export const IconDownload = () => (
+  <svg {...base}>
+    <path d="M8 2.5v7.5M4.8 7l3.2 3.2L11.2 7M2.5 12.5v1h11v-1" />
   </svg>
 )
 

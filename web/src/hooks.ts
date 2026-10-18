@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Dashboard, Query } from './types'
 
-function toSearch(q: Query): string {
+export function toSearch(q: Query): string {
   const p = new URLSearchParams()
   p.set('range', q.range)
   p.set('tz', Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC')

@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { useActiveSection, useDashboard, useTheme } from './hooks'
+import { toSearch, useActiveSection, useDashboard, useTheme } from './hooks'
 import { stamp } from './format'
 import type { Dashboard, RangeKey } from './types'
 import { MultiSelect, RangeControl } from './components/Filters'
+import { AccuracyCard } from './components/AccuracyCard'
 import { ActivityCard } from './components/Activity'
 import { Hero } from './components/Hero'
 import { KeyFigures } from './components/KeyFigures'
@@ -10,13 +11,14 @@ import { LatencySection, ModelsCard } from './components/LatencySection'
 import { RankedList } from './components/RankedList'
 import { CostliestCard, FailuresCard } from './components/RequestTables'
 import { SpendSection } from './components/SpendChart'
-import { IconTag, IconUsers, Logo, Moon, Sun, Warning } from './components/icons'
+import { IconDownload, IconTag, IconUsers, Logo, Moon, Sun, Warning } from './components/icons'
 
 const NAV = [
   { id: 'overview', label: 'Overview' },
   { id: 'spend', label: 'Spend' },
   { id: 'latency', label: 'Latency' },
   { id: 'requests', label: 'Requests' },
+  { id: 'accuracy', label: 'Accuracy' },
 ]
 
 export default function App() {
@@ -27,7 +29,9 @@ export default function App() {
   const [features, setFeatures] = useState<string[]>([])
   const [live, setLive] = useState(false)
   const { theme, toggle } = useTheme()
-  const { data, error, loading, reload } = useDashboard({ range, providers, models, users, features }, live)
+  const query = { range, providers, models, users, features }
+  const { data, error, loading, reload } = useDashboard(query, live)
+  const reportUrl = (format: 'md' | 'csv') => `/api/report?format=${format}&${toSearch(query)}`
   const active = useActiveSection(NAV.map((n) => n.id), data !== null)
 
   const filtersActive = providers.length + models.length + users.length + features.length > 0
@@ -44,7 +48,9 @@ export default function App() {
         <div className="topbar-inner">
           <div className="brand">
             <Logo />
-            <span>LLM Cost Monitor</span>
+            <span>
+              LLM Cost <span className="brand-soft">Monitor</span>
+            </span>
           </div>
           {data && data.meta.models.length > 0 && data.summary.requests > 0 && (
             <nav className="nav" aria-label="Sections">
@@ -115,6 +121,18 @@ export default function App() {
                 <button type="button" className="link-button" onClick={clearFilters}>
                   Clear filters
                 </button>
+              )}
+              {data.summary.requests > 0 && (
+                <div className="downloads" role="group" aria-label="Download this view">
+                  <a className="pill" href={reportUrl('md')} download title="Summary, accuracy checks and breakdowns as a Markdown report">
+                    <IconDownload />
+                    Report
+                  </a>
+                  <a className="pill" href={reportUrl('csv')} download title="Every request in this view as a CSV file">
+                    <IconDownload />
+                    CSV
+                  </a>
+                </div>
               )}
             </div>
             {error && (
@@ -187,6 +205,7 @@ function Body({ data }: { data: Dashboard }) {
           hint="Add an X-Feature-Tag header to your requests to see spend per feature."
         />
         <FailuresCard rows={data.failures} />
+        <AccuracyCard accuracy={data.accuracy} />
       </div>
     </>
   )

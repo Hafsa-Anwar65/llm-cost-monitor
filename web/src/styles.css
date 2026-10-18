@@ -1222,3 +1222,148 @@ td.wrap {
     transition: none !important;
   }
 }
+
+/* ------------------------------------------------------- brand and downloads */
+.logo {
+  flex: none;
+  border-radius: 9px;
+  box-shadow: 0 4px 14px rgba(108, 63, 232, 0.35);
+}
+
+.brand-soft {
+  color: var(--ink2);
+  font-weight: 500;
+}
+
+.downloads {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.downloads .pill {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* ------------------------------------------------------------ data accuracy */
+.acc {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.acc-score {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding-top: 6px;
+}
+
+.acc-score-num {
+  fill: var(--ink);
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 650;
+}
+
+.acc-score-of {
+  fill: var(--muted);
+  font-size: 11px;
+}
+
+.acc-grade {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.acc-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  list-style: none;
+}
+
+.acc-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--sunken);
+}
+
+.acc-icon {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
+.acc-na {
+  color: var(--muted);
+}
+
+.acc-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.acc-badge {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--hover);
+  color: var(--ink2);
+}
+
+.acc-badge[data-status='ok'] {
+  color: var(--good);
+}
+
+.acc-badge[data-status='warn'] {
+  color: var(--warn);
+}
+
+.acc-badge[data-status='fail'] {
+  color: var(--crit);
+}
+
+.acc-detail {
+  margin-top: 4px;
+  color: var(--ink2);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.acc-value {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 860px) {
+  .acc {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .acc-list {
+    grid-template-columns: 1fr;
+  }
+
+  .downloads {
+    margin-left: 0;
+  }
+}

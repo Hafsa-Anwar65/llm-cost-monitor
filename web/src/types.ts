@@ -67,6 +67,23 @@ export interface RequestRow {
   error: string | null
 }
 
+export type CheckStatus = 'ok' | 'warn' | 'fail' | 'na'
+
+export interface AccuracyCheck {
+  id: string
+  label: string
+  status: CheckStatus
+  value: string
+  detail: string
+}
+
+export interface Accuracy {
+  score: number
+  grade: 'High' | 'Medium' | 'Low'
+  checks: AccuracyCheck[]
+  requests_checked: number
+}
+
 export interface Dashboard {
   range: RangeKey
   tz: string
@@ -86,6 +103,7 @@ export interface Dashboard {
   unpriced: { count: number; models: string[] }
   budget: { limit: number | null; today: number }
   meta: { models: string[]; providers: string[]; users: string[]; features: string[] }
+  accuracy: Accuracy
 }
 
 export interface Query {

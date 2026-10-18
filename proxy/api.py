@@ -13,8 +13,12 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from fastapi import APIRouter, HTTPException, Query, Request
 
+from fastapi.responses import Response
+
+from . import report
 from .config import Settings
 from .db import Database, utc_day
+from .pricing import PricingTable
 
 router = APIRouter(prefix="/api")
 
@@ -119,6 +123,8 @@ def build_dashboard(
     models: list[str],
     users: list[str],
     features: list[str],
+    pricing: PricingTable | None = None,
+    with_rows: bool = False,
 ) -> dict:
     tz, tz_name = _tz(tz_name)
     now = datetime.now(timezone.utc)
@@ -257,7 +263,7 @@ def build_dashboard(
     top = sorted(paired, key=lambda p: p[0]["cost_usd"] or 0.0, reverse=True)[:15]
     fails = [p for p in reversed(paired) if (p[0]["status_code"] or 0) >= 400][:20]
 
-    return {
+    payload = {
         "range": range_key,
         "tz": tz_name,
         "bucket": unit,
@@ -287,7 +293,12 @@ def build_dashboard(
         "unpriced": {"count": unpriced_count, "models": sorted(unpriced_models)},
         "budget": {"limit": settings.daily_budget_usd, "today": _r6(db.spend_for_day(utc_day()))},
         "meta": meta,
+        "accuracy": report.accuracy(rows, pricing),
     }
+    if with_rows:
+        payload["_rows"] = rows
+        payload["_local"] = lambda ts: _to_local(ts, tz).strftime(TS_FORMAT)
+    return payload
 
 
 @router.get("/dashboard")
@@ -311,4 +322,44 @@ def dashboard(
         models=model,
         users=user,
         features=feature,
+        pricing=getattr(request.app.state, "pricing", None),
     )
+
+
+@router.get("/report")
+def download_report(
+    request: Request,
+    format: str = "md",
+    range_key: str = Query("7d", alias="range"),
+    tz: str = "UTC",
+    provider: list[str] = Query(default=[]),
+    model: list[str] = Query(default=[]),
+    user: list[str] = Query(default=[]),
+    feature: list[str] = Query(default=[]),
+):
+    """The current view as a file: a Markdown report (`md`) or every request as CSV (`csv`)."""
+    if range_key not in WINDOWS:
+        raise HTTPException(status_code=400, detail=f"range must be one of {', '.join(WINDOWS)}")
+    if format not in ("md", "csv"):
+        raise HTTPException(status_code=400, detail="format must be md or csv")
+    data = build_dashboard(
+        request.app.state.db,
+        request.app.state.settings,
+        range_key=range_key,
+        tz_name=tz,
+        providers=provider,
+        models=model,
+        users=user,
+        features=feature,
+        pricing=getattr(request.app.state, "pricing", None),
+        with_rows=True,
+    )
+    day = data["generated_at"][:10]
+    if format == "csv":
+        body = report.requests_csv(data["_rows"], data["_local"])
+        media, name = "text/csv; charset=utf-8", f"llm-requests-{range_key}-{day}.csv"
+    else:
+        filters = {"providers": provider, "models": model, "users": user, "features": feature}
+        body = report.markdown_report(data, filters)
+        media, name = "text/markdown; charset=utf-8", f"llm-report-{range_key}-{day}.md"
+    return Response(body, media_type=media, headers={"Content-Disposition": f'attachment; filename="{name}"'})
