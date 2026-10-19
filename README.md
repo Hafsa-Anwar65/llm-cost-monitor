@@ -1,195 +1,190 @@
-# LLM Cost & Latency Monitor
+<!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:2B2A28,50:57534E,100:8A9A82&height=220&section=header&text=LLM%20Cost%20Monitor&fontSize=52&fontColor=F5F1EA&fontAlignY=38&desc=Track%20every%20token.%20Every%20millisecond.%20Every%20rupee.&descSize=18&descAlignY=58&animation=fadeIn" width="100%" alt="LLM Cost Monitor banner"/>
+</p>
 
-A tiny logging proxy that sits between your app and the Anthropic / OpenAI APIs and records
-**tokens, cost, and latency (including time-to-first-token) for every request**, with a React
-dashboard to explore it.
+<p align="center">
+  <b>A lightweight logging proxy + live dashboard that shows exactly what your LLM calls cost and how fast they are.</b>
+</p>
 
-**Adopting it is one line:** change the SDK's base URL. No wrapper library, no code changes.
+<p align="center">
+  <img src="https://img.shields.io/badge/status-active-8A9A82?style=for-the-badge&labelColor=2B2A28" alt="status"/>
+  <img src="https://img.shields.io/badge/Hacktoberfest-friendly-C2A878?style=for-the-badge&labelColor=2B2A28" alt="hacktoberfest"/>
+  <img src="https://img.shields.io/badge/PRs-welcome-A8A29E?style=for-the-badge&labelColor=2B2A28" alt="PRs welcome"/>
+  <img src="https://img.shields.io/badge/license-MIT-D6CFC4?style=for-the-badge&labelColor=2B2A28" alt="license"/>
+</p>
 
+<p align="center">
+  <a href="#-features">Features</a> •
+  <a href="#-how-it-works">How it works</a> •
+  <a href="#-quick-start">Quick start</a> •
+  <a href="#-dashboard">Dashboard</a> •
+  <a href="#-roadmap">Roadmap</a> •
+  <a href="#-contributing">Contributing</a>
+</p>
+
+<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
+
+## 🧭 Why this exists
+
+LLM bills grow quietly. A prompt gets longer, a model gets swapped, a retry loop runs twice, and nobody notices until the invoice arrives.
+
+**LLM Cost Monitor** sits between your app and the model provider. It logs every request with zero changes to your app logic, then turns those logs into a dashboard you can read in five seconds.
+
+> [!TIP]
+> Point your app's base URL at the proxy and you're done. No SDK rewrite, no vendor lock-in.
+
+<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
+
+## ✨ Features
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>💸 Cost tracking</h3>
+      Per-request cost calculated from input and output tokens using each model's pricing. See totals by day, model, or endpoint.
+    </td>
+    <td width="50%" valign="top">
+      <h3>⏱️ Latency monitoring</h3>
+      Response time for every call, with averages and slow-request spotting so you know which model or prompt is dragging.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🔌 Drop-in proxy</h3>
+      Forwards requests to the provider unchanged and logs the metadata on the way back. Your app keeps working exactly as before.
+    </td>
+    <td width="50%" valign="top">
+      <h3>📊 Live dashboard</h3>
+      Clean, neutral-toned charts and tables for spend, token usage, and latency trends, readable at a glance.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🧾 Request log</h3>
+      Searchable history of every call: model, tokens in/out, cost, latency, and status.
+    </td>
+    <td width="50%" valign="top">
+      <h3>🪶 Lightweight</h3>
+      Minimal setup, local storage, no heavy infrastructure. Runs on a laptop.
+    </td>
+  </tr>
+</table>
+
+<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
+
+## 🏗️ How it works
+
+```mermaid
+%%{init: {'theme':'base','themeVariables':{
+  'primaryColor':'#F5F1EA','primaryTextColor':'#2B2A28','primaryBorderColor':'#8A9A82',
+  'lineColor':'#57534E','secondaryColor':'#D6CFC4','tertiaryColor':'#EDE8DF',
+  'fontFamily':'Inter, Segoe UI, sans-serif'}}}%%
+flowchart LR
+    A[🖥️ Your App] -->|request| B(🔌 Cost Monitor Proxy)
+    B -->|forward| C[🤖 LLM Provider]
+    C -->|response| B
+    B -->|response| A
+    B -->|tokens · cost · latency| D[(🗄️ Usage Log)]
+    D --> E[📊 Dashboard]
 ```
-Your app ──▶ Proxy (FastAPI) ──▶ Anthropic / OpenAI
-                  │
-                  ▼
-          SQLite (WAL mode) ──▶ JSON API ──▶ React dashboard (served at /dashboard)
-```
 
-One process, one port: the proxy, the API, and the dashboard all run from `uvicorn proxy.main:app`.
+| Step | What happens |
+|:---:|:---|
+| **1** | Your app sends its normal LLM request to the proxy instead of the provider |
+| **2** | The proxy forwards it and starts a timer |
+| **3** | On response, it reads token usage and computes cost from the model's price table |
+| **4** | Metadata is saved to the usage log; the response goes back to your app untouched |
+| **5** | The dashboard reads the log and renders spend, usage, and latency |
 
-![Dashboard](docs/screenshots/dashboard.png)
+<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
 
-![Data accuracy checks](docs/screenshots/accuracy.png)
-
-<sub>Screenshots show synthetic demo data from `scripts/seed_demo_data.py`.</sub>
-
-## Features
-
-- **Drop-in proxy** for Anthropic (`/v1/messages`) and OpenAI (`/v1/chat/completions`, `/v1/responses`)
-- **Streaming done right:** chunks are relayed as they arrive; usage and TTFT are tallied on the side
-- **Cost per request** from an editable `pricing.json` (hot-reloaded), including prompt-cache tokens
-- **Attribution:** tag requests by user and feature with two headers
-- **React dashboard:** a plain-language summary of where the money went, spend over time by model,
-  p50/p95/p99 latency, time-to-first-token, spend by user and feature, costliest requests, failures,
-  a daily-budget meter, filters, live refresh, light and dark themes, and a table view for every chart
-- **Data accuracy score:** seven checks tell you whether to trust the numbers: token usage captured,
-  every model priced, stored costs re-computed against `pricing.json`, latency and time-to-first-token
-  recorded, spend traced to a feature, and how old your prices are
-- **Downloadable reports:** one click exports the current view as a Markdown report (summary, accuracy
-  checks, breakdowns, costliest calls) or every request as CSV
-- **Budget alerts:** one Slack/Discord webhook per day when spend crosses your limit
-- **Never breaks your app:** if logging fails, your response still goes through
-- **Private by default:** API keys are forwarded, never stored; prompts are not logged unless you opt in
-
-## Quick start (Python only, no Node needed)
+## 🚀 Quick start
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate            # Windows PowerShell: .venv\Scripts\Activate.ps1
+# 1. Clone
+git clone https://github.com/Hafsa-Anwar65/<REPO-NAME>.git
+cd <REPO-NAME>
+
+# 2. Install dependencies
 pip install -r requirements.txt
 
-python scripts/seed_demo_data.py     # optional: synthetic demo data, no API keys needed
-uvicorn proxy.main:app --port 8000
+# 3. Add your provider key
+cp .env.example .env
+#   then set your API key inside .env
+
+# 4. Run the proxy + dashboard
+<YOUR-RUN-COMMAND>
 ```
 
-Open **http://localhost:8000/dashboard**.
-
-The built dashboard ships in `proxy/static/`, so you only need Node.js if you want to change the UI.
-
-### Docker
-
-```bash
-cp .env.example .env          # optional: set DAILY_BUDGET_USD, SLACK_WEBHOOK_URL
-docker compose up --build     # http://localhost:8000/dashboard
-docker compose run --rm monitor python scripts/seed_demo_data.py   # optional demo data
-```
-
-## Use it from your code
-
-Only the base URL changes. Your real API key still goes in the normal place; the proxy forwards it.
-
-**Anthropic**
+Then point your app at the proxy:
 
 ```python
-import anthropic
-
-client = anthropic.Anthropic(
-    base_url="http://localhost:8000/anthropic",
-    default_headers={"x-user-tag": "alice", "x-feature-tag": "chat-assistant"},  # optional
-)
-msg = client.messages.create(model="<your-model>", max_tokens=200,
-                             messages=[{"role": "user", "content": "Hello"}])
+client = OpenAI(base_url="http://localhost:<PORT>/v1", api_key="your-key")
 ```
 
-**OpenAI**
+<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
 
-```python
-from openai import OpenAI
+## 📊 Dashboard
 
-client = OpenAI(
-    base_url="http://localhost:8000/openai/v1",
-    default_headers={"x-user-tag": "alice", "x-feature-tag": "chat-assistant"},  # optional
-)
-```
+<p align="center">
+  <img src="docs/dashboard.png" width="90%" alt="Dashboard screenshot" style="border-radius:12px"/>
+</p>
 
-**curl**
+<p align="center"><i>Spend, token usage, and latency in one view.</i></p>
 
-```bash
-curl http://localhost:8000/anthropic/v1/messages \
-  -H "x-api-key: $ANTHROPIC_API_KEY" -H "anthropic-version: 2023-06-01" \
-  -H "content-type: application/json" -H "x-feature-tag: demo" \
-  -d '{"model":"<your-model>","max_tokens":64,"messages":[{"role":"user","content":"hi"}]}'
-```
+<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
 
-Bare-URL aliases (`http://localhost:8000/v1/messages`, `/v1/chat/completions`, `/v1/responses`) also work.
+## 🧰 Tech stack
 
-## Set your prices (important)
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-57534E?style=for-the-badge&logo=python&logoColor=F5F1EA"/>
+  <img src="https://img.shields.io/badge/FastAPI-8A9A82?style=for-the-badge&logo=fastapi&logoColor=F5F1EA"/>
+  <img src="https://img.shields.io/badge/SQLite-A8A29E?style=for-the-badge&logo=sqlite&logoColor=2B2A28"/>
+  <img src="https://img.shields.io/badge/Chart.js-C2A878?style=for-the-badge&logo=chartdotjs&logoColor=2B2A28"/>
+</p>
 
-`pricing.json` holds USD per **million** tokens and matches models by longest prefix
-(`gpt-4o-mini-2024-07-18` → `gpt-4o-mini`). The file ships with **example rates for older models**.
-Prices change, so check each provider's pricing page and add the models you actually use.
+<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
 
-```json
-"your-model-name": { "input": 3.00, "output": 15.00, "cache_read": 0.30, "cache_write": 3.75 }
-```
+## 🗺️ Roadmap
 
-If a request uses a model with no entry, it is logged with cost $0 **and flagged**; the dashboard
-shows a banner listing the unpriced models so you never silently under-count spend.
-Edits to the file apply without restarting the proxy.
+- [x] Logging proxy with token + latency capture
+- [x] Cost calculation per request
+- [x] Dashboard with spend and latency views
+- [ ] Support for more providers (Anthropic, Gemini, Groq, local models)
+- [ ] Budget limits with alerts
+- [ ] Per-project / per-API-key cost breakdown
+- [ ] CSV export of usage logs
+- [ ] Docker image for one-command setup
 
-## Configuration
+<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
 
-| Variable | Default | Purpose |
-|---|---|---|
-| `DB_PATH` | `data/monitor.db` | SQLite file (Docker uses a volume at `/data`) |
-| `PRICING_PATH` | `pricing.json` | Price table |
-| `DAILY_BUDGET_USD` | *(off)* | Alert when today's (UTC) spend crosses this; also drives the dashboard meter |
-| `SLACK_WEBHOOK_URL` | *(off)* | Slack or Discord incoming webhook for alerts |
-| `LOG_PROMPTS` | `0` | `1` stores a 2,000-char prompt preview per request |
-| `INJECT_OPENAI_USAGE` | `1` | Adds `stream_options.include_usage` to OpenAI streamed chat requests |
-| `ANTHROPIC_BASE_URL` / `OPENAI_BASE_URL` | official APIs | Point at a gateway or compatible endpoint |
-| `REQUEST_TIMEOUT_S` | `300` | Upstream read timeout |
+## 🤝 Contributing
 
-On Windows PowerShell, set variables for one session with `$env:DAILY_BUDGET_USD="50"` before starting the proxy,
-or put them in `.env` and run `uvicorn proxy.main:app --env-file .env`.
+Contributions are very welcome, especially during **Hacktoberfest** 🎃
 
-## Demo it for real
+1. **Fork** the repo and create a branch: `git checkout -b feature/your-idea`
+2. **Make your change** and keep it focused on one thing
+3. **Commit** with a clear message: `git commit -m "Add budget alert threshold"`
+4. **Open a PR** describing what you changed and why
 
-```bash
-export ANTHROPIC_API_KEY=...              # and/or OPENAI_API_KEY
-export DEMO_ANTHROPIC_MODEL=<a cheap model you have access to>
-python scripts/demo_traffic.py --n 50     # 50 tiny calls (about cents) through the proxy
-```
+> [!NOTE]
+> New here? Look for issues labelled **`good first issue`**. Adding a model's pricing to the price table is a great first PR.
 
-Keep the dashboard open with **Live** switched on while it runs. That is your screen recording.
+<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
 
-## How it works
+## 👩‍💻 Author
 
-1. The proxy receives the request, forwards it with your original headers (minus the two tag headers), and times it.
-2. **Non-streaming:** it reads `usage` from the JSON response.
-3. **Streaming:** it relays SSE chunks untouched while a parser reads usage on the side:
-   Anthropic reports input tokens in `message_start` and output tokens in `message_delta`;
-   OpenAI reports usage in a final chunk (the proxy asks for it) or in `response.completed`.
-   TTFT is the time to the first *content* delta, not the first byte.
-4. Cache tokens are normalised: Anthropic reports them separately from input, OpenAI reports them as a
-   subset of the prompt, so the proxy subtracts to keep one cost formula.
-5. A row is written after the response completes (also on errors and client disconnects).
-6. The dashboard calls `GET /api/dashboard` (range, timezone and filters as query parameters). The
-   server aggregates in one pass and returns everything the page needs in a single response.
+<p align="center">
+  <b>Hafsa Anwar</b><br/>
+  <sub>AI &amp; Automation Engineer</sub><br/><br/>
+  <a href="https://www.linkedin.com/in/hafsa-anwar-53b251313"><img src="https://img.shields.io/badge/LinkedIn-57534E?style=for-the-badge&logo=linkedin&logoColor=F5F1EA"/></a>
+  <a href="https://github.com/Hafsa-Anwar65"><img src="https://img.shields.io/badge/GitHub-2B2A28?style=for-the-badge&logo=github&logoColor=F5F1EA"/></a>
+</p>
 
-7. The accuracy checks run over the same rows, so the score always describes the view you are looking at.
-   `GET /api/report?format=md|csv` takes the same query parameters and returns the view as a file.
+<p align="center"><sub>If this project saved you money, a ⭐ helps others find it.</sub></p>
 
-Not logged: `count_tokens` calls (free) and non-JSON requests such as file uploads.
-
-## Changing the dashboard
-
-The UI is a Vite + React + TypeScript app using Recharts, in `web/`. You need Node.js 20+.
-
-```bash
-cd web
-npm install
-npm run dev        # http://localhost:5173/dashboard/ with hot reload; needs the proxy running on :8000
-npm run build      # type-checks, then writes the production build into proxy/static/
-```
-
-## Project layout
-
-```
-proxy/        FastAPI proxy, usage parsing, pricing, SQLite, budget alerts, dashboard API
-proxy/static/ the built React dashboard (generated by `npm run build`)
-web/          React + TypeScript source for the dashboard
-scripts/      seed_demo_data.py (synthetic), demo_traffic.py (real calls)
-tests/        proxy, parser, pricing, dashboard-API, accuracy and report tests
-docs/         design notes and a LinkedIn post kit
-```
-
-Run the tests: `pytest`
-
-## Limits and next steps
-
-- **No authentication.** Anyone who can reach the proxy can use it (with their own key) and read the dashboard.
-  Docker binds to localhost only; add auth and TLS before exposing it anywhere.
-- SQLite is perfect for one instance. For several proxy replicas or heavy volume, move to Postgres.
-- The dashboard API loads the selected time range into memory to compute percentiles; for tens of millions
-  of rows you would want pre-aggregated tables.
-- Latency is measured at the proxy, so it includes the proxy-to-provider hop but not your app-to-proxy hop.
-- Ideas: per-user budgets, a model router, a semantic cache, Gemini / Bedrock adapters.
+<!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:8A9A82,50:57534E,100:2B2A28&height=120&section=footer" width="100%"/>
+</p>
