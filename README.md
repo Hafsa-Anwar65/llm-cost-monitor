@@ -1,190 +1,201 @@
-<!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
-<p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:2B2A28,50:57534E,100:8A9A82&height=220&section=header&text=LLM%20Cost%20Monitor&fontSize=52&fontColor=F5F1EA&fontAlignY=38&desc=Track%20every%20token.%20Every%20millisecond.%20Every%20rupee.&descSize=18&descAlignY=58&animation=fadeIn" width="100%" alt="LLM Cost Monitor banner"/>
+<div align="center">
+
+<img src="https://capsule-render.vercel.app/api?type=rect&color=0:2B2A28,100:57534E&height=150&text=LLM%20Cost%20Monitor&fontSize=44&fontColor=F5F1EA&fontAlignY=45&desc=Cost%20and%20latency%20observability%20for%20LLM%20applications&descSize=16&descAlignY=72&descColor=D6CFC4" width="100%" alt="LLM Cost Monitor"/>
+
+<br/>
+
+<img src="https://img.shields.io/badge/status-active-8A9A82?style=flat-square&labelColor=2B2A28" alt="Status"/>
+<img src="https://img.shields.io/badge/license-MIT-A8A29E?style=flat-square&labelColor=2B2A28" alt="License"/>
+<img src="https://img.shields.io/badge/PRs-welcome-C2A878?style=flat-square&labelColor=2B2A28" alt="PRs welcome"/>
+<img src="https://img.shields.io/badge/Hacktoberfest-2026-57534E?style=flat-square&labelColor=2B2A28" alt="Hacktoberfest"/>
+
+<p>
+<a href="#overview">Overview</a> &nbsp;·&nbsp;
+<a href="#interface">Interface</a> &nbsp;·&nbsp;
+<a href="#how-it-works">How it works</a> &nbsp;·&nbsp;
+<a href="#getting-started">Getting started</a> &nbsp;·&nbsp;
+<a href="#roadmap">Roadmap</a> &nbsp;·&nbsp;
+<a href="#contributing">Contributing</a>
 </p>
 
-<p align="center">
-  <b>A lightweight logging proxy + live dashboard that shows exactly what your LLM calls cost and how fast they are.</b>
-</p>
+</div>
+
+---
+
+## Overview
+
+LLM costs are easy to lose track of. Prompts get longer, models get swapped, and retries run in the background. Usually nobody notices until the invoice arrives.
+
+**LLM Cost Monitor** is a lightweight logging proxy that sits between your application and the model provider. It records the token usage, cost and latency of every request, and a dashboard turns those records into numbers you can act on.
+
+| | |
+|:--|:--|
+| **What it is** | A drop-in proxy plus a dashboard |
+| **Who it is for** | Developers and teams running LLM features in production or prototypes |
+| **What you change** | One line: your client's base URL |
+| **What you get** | Per-request cost, latency, and token usage, aggregated by model and over time |
+
+---
+
+## Interface
 
 <p align="center">
-  <img src="https://img.shields.io/badge/status-active-8A9A82?style=for-the-badge&labelColor=2B2A28" alt="status"/>
-  <img src="https://img.shields.io/badge/Hacktoberfest-friendly-C2A878?style=for-the-badge&labelColor=2B2A28" alt="hacktoberfest"/>
-  <img src="https://img.shields.io/badge/PRs-welcome-A8A29E?style=for-the-badge&labelColor=2B2A28" alt="PRs welcome"/>
-  <img src="https://img.shields.io/badge/license-MIT-D6CFC4?style=for-the-badge&labelColor=2B2A28" alt="license"/>
+  <img src="docs/dashboard.svg" width="100%" alt="LLM Cost Monitor dashboard"/>
 </p>
+<p align="center"><sub>Dashboard overview (illustrative sample data)</sub></p>
+
+The dashboard has three areas:
+
+| Area | What it shows |
+|:--|:--|
+| **Summary cards** | Total spend, request count, average and p95 latency, and tokens processed for the selected period |
+| **Spend over time / Cost by model** | Daily cost trend, plus which models drive the bill |
+| **Recent requests** | A live log with model, input and output tokens, cost, latency and HTTP status for each call |
+
+---
+
+## How it works
 
 <p align="center">
-  <a href="#-features">Features</a> •
-  <a href="#-how-it-works">How it works</a> •
-  <a href="#-quick-start">Quick start</a> •
-  <a href="#-dashboard">Dashboard</a> •
-  <a href="#-roadmap">Roadmap</a> •
-  <a href="#-contributing">Contributing</a>
+  <img src="docs/how-it-works.svg" width="100%" alt="Request flow through the proxy"/>
 </p>
 
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
+1. **Request:** your application sends a normal chat or completion request to the proxy instead of the provider.
+2. **Forward:** the proxy starts a timer and forwards the request unchanged.
+3. **Completion:** the provider responds with the output and its token usage.
+4. **Log:** the proxy calculates cost from the model's price table and writes one record to the usage log.
+5. **Response:** the original response is returned to your application, untouched.
+6. **Visualise:** the dashboard reads the usage log and aggregates it.
 
-## 🧭 Why this exists
+### What gets recorded
 
-LLM bills grow quietly. A prompt gets longer, a model gets swapped, a retry loop runs twice, and nobody notices until the invoice arrives.
+| Field | Description |
+|:--|:--|
+| `timestamp` | When the request was made |
+| `model` | Model name reported by the provider |
+| `input_tokens` / `output_tokens` | Token counts from the provider's usage field |
+| `cost_usd` | Calculated from the model's per-token pricing |
+| `latency_ms` | Time from request sent to response received |
+| `status` | HTTP status code of the provider response |
 
-**LLM Cost Monitor** sits between your app and the model provider. It logs every request with zero changes to your app logic, then turns those logs into a dashboard you can read in five seconds.
+---
 
-> [!TIP]
-> Point your app's base URL at the proxy and you're done. No SDK rewrite, no vendor lock-in.
+## Features
 
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
+| Feature | Description |
+|:--|:--|
+| **Cost tracking** | Per-request and aggregate cost, broken down by day and by model |
+| **Latency monitoring** | Average and p95 latency to spot slow models or prompts |
+| **Token accounting** | Separate input and output token totals |
+| **Drop-in proxy** | No SDK changes and no code rewrites; only the base URL changes |
+| **Request history** | A searchable log of every call, including failures such as rate limits |
+| **Local first** | Runs on your machine with lightweight local storage |
 
-## ✨ Features
+---
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>💸 Cost tracking</h3>
-      Per-request cost calculated from input and output tokens using each model's pricing. See totals by day, model, or endpoint.
-    </td>
-    <td width="50%" valign="top">
-      <h3>⏱️ Latency monitoring</h3>
-      Response time for every call, with averages and slow-request spotting so you know which model or prompt is dragging.
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>🔌 Drop-in proxy</h3>
-      Forwards requests to the provider unchanged and logs the metadata on the way back. Your app keeps working exactly as before.
-    </td>
-    <td width="50%" valign="top">
-      <h3>📊 Live dashboard</h3>
-      Clean, neutral-toned charts and tables for spend, token usage, and latency trends, readable at a glance.
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>🧾 Request log</h3>
-      Searchable history of every call: model, tokens in/out, cost, latency, and status.
-    </td>
-    <td width="50%" valign="top">
-      <h3>🪶 Lightweight</h3>
-      Minimal setup, local storage, no heavy infrastructure. Runs on a laptop.
-    </td>
-  </tr>
-</table>
+## Getting started
 
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
+### Prerequisites
 
-## 🏗️ How it works
+- Python 3.10 or newer
+- An API key for at least one LLM provider
 
-```mermaid
-%%{init: {'theme':'base','themeVariables':{
-  'primaryColor':'#F5F1EA','primaryTextColor':'#2B2A28','primaryBorderColor':'#8A9A82',
-  'lineColor':'#57534E','secondaryColor':'#D6CFC4','tertiaryColor':'#EDE8DF',
-  'fontFamily':'Inter, Segoe UI, sans-serif'}}}%%
-flowchart LR
-    A[🖥️ Your App] -->|request| B(🔌 Cost Monitor Proxy)
-    B -->|forward| C[🤖 LLM Provider]
-    C -->|response| B
-    B -->|response| A
-    B -->|tokens · cost · latency| D[(🗄️ Usage Log)]
-    D --> E[📊 Dashboard]
-```
-
-| Step | What happens |
-|:---:|:---|
-| **1** | Your app sends its normal LLM request to the proxy instead of the provider |
-| **2** | The proxy forwards it and starts a timer |
-| **3** | On response, it reads token usage and computes cost from the model's price table |
-| **4** | Metadata is saved to the usage log; the response goes back to your app untouched |
-| **5** | The dashboard reads the log and renders spend, usage, and latency |
-
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
-
-## 🚀 Quick start
+### Installation
 
 ```bash
-# 1. Clone
 git clone https://github.com/Hafsa-Anwar65/<REPO-NAME>.git
 cd <REPO-NAME>
-
-# 2. Install dependencies
 pip install -r requirements.txt
-
-# 3. Add your provider key
 cp .env.example .env
-#   then set your API key inside .env
+```
 
-# 4. Run the proxy + dashboard
+### Configuration
+
+| Variable | Required | Description |
+|:--|:--:|:--|
+| `OPENAI_API_KEY` | Yes | Provider API key forwarded with requests |
+| `PROXY_PORT` | No | Port the proxy listens on (default `8000`) |
+| `DB_PATH` | No | Location of the usage log database |
+
+### Run
+
+```bash
 <YOUR-RUN-COMMAND>
 ```
 
-Then point your app at the proxy:
+### Connect your application
+
+Point your existing client at the proxy. Nothing else changes.
 
 ```python
-client = OpenAI(base_url="http://localhost:<PORT>/v1", api_key="your-key")
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:8000/v1",
+    api_key="your-api-key",
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello"}],
+)
 ```
 
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
+Open the dashboard at `http://localhost:<DASHBOARD-PORT>` to see the request appear.
 
-## 📊 Dashboard
+---
 
-<p align="center">
-  <img src="docs/dashboard.png" width="90%" alt="Dashboard screenshot" style="border-radius:12px"/>
+## Tech stack
+
+<p>
+<img src="https://img.shields.io/badge/Python-57534E?style=flat-square&logo=python&logoColor=F5F1EA" alt="Python"/>
+<img src="https://img.shields.io/badge/FastAPI-8A9A82?style=flat-square&logo=fastapi&logoColor=F5F1EA" alt="FastAPI"/>
+<img src="https://img.shields.io/badge/SQLite-A8A29E?style=flat-square&logo=sqlite&logoColor=2B2A28" alt="SQLite"/>
+<img src="https://img.shields.io/badge/Chart.js-C2A878?style=flat-square&logo=chartdotjs&logoColor=2B2A28" alt="Chart.js"/>
 </p>
 
-<p align="center"><i>Spend, token usage, and latency in one view.</i></p>
+---
 
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
+## Roadmap
 
-## 🧰 Tech stack
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-57534E?style=for-the-badge&logo=python&logoColor=F5F1EA"/>
-  <img src="https://img.shields.io/badge/FastAPI-8A9A82?style=for-the-badge&logo=fastapi&logoColor=F5F1EA"/>
-  <img src="https://img.shields.io/badge/SQLite-A8A29E?style=for-the-badge&logo=sqlite&logoColor=2B2A28"/>
-  <img src="https://img.shields.io/badge/Chart.js-C2A878?style=for-the-badge&logo=chartdotjs&logoColor=2B2A28"/>
-</p>
-
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
-
-## 🗺️ Roadmap
-
-- [x] Logging proxy with token + latency capture
-- [x] Cost calculation per request
-- [x] Dashboard with spend and latency views
-- [ ] Support for more providers (Anthropic, Gemini, Groq, local models)
-- [ ] Budget limits with alerts
-- [ ] Per-project / per-API-key cost breakdown
+- [x] Logging proxy with token and latency capture
+- [x] Per-request cost calculation
+- [x] Dashboard with spend, model and latency views
+- [ ] Additional providers: Anthropic, Gemini, Groq, local models
+- [ ] Budget thresholds with alerts
+- [ ] Cost breakdown per project and per API key
 - [ ] CSV export of usage logs
 - [ ] Docker image for one-command setup
 
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
+---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are very welcome, especially during **Hacktoberfest** 🎃
+Contributions are welcome, and this repository takes part in **Hacktoberfest**.
 
-1. **Fork** the repo and create a branch: `git checkout -b feature/your-idea`
-2. **Make your change** and keep it focused on one thing
-3. **Commit** with a clear message: `git commit -m "Add budget alert threshold"`
-4. **Open a PR** describing what you changed and why
+1. Fork the repository and create a branch: `git checkout -b feature/short-description`
+2. Keep each pull request focused on a single change
+3. Write a clear commit message, for example `Add pricing for gemini-1.5-pro`
+4. Open a pull request that explains what changed and why
 
 > [!NOTE]
-> New here? Look for issues labelled **`good first issue`**. Adding a model's pricing to the price table is a great first PR.
+> New to the project? Issues labelled `good first issue` are a good place to start. Adding a model to the pricing table is a small, self-contained first contribution.
 
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:D6CFC4,100:8A9A82&height=3" width="100%"/>
+---
 
-## 👩‍💻 Author
+## License
 
-<p align="center">
-  <b>Hafsa Anwar</b><br/>
-  <sub>AI &amp; Automation Engineer</sub><br/><br/>
-  <a href="https://www.linkedin.com/in/hafsa-anwar-53b251313"><img src="https://img.shields.io/badge/LinkedIn-57534E?style=for-the-badge&logo=linkedin&logoColor=F5F1EA"/></a>
-  <a href="https://github.com/Hafsa-Anwar65"><img src="https://img.shields.io/badge/GitHub-2B2A28?style=for-the-badge&logo=github&logoColor=F5F1EA"/></a>
-</p>
+Distributed under the MIT License. See [`LICENSE`](LICENSE) for details.
 
-<p align="center"><sub>If this project saved you money, a ⭐ helps others find it.</sub></p>
+---
 
-<!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
-<p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:8A9A82,50:57534E,100:2B2A28&height=120&section=footer" width="100%"/>
-</p>
+<div align="center">
+
+**Hafsa Anwar** · AI & Automation Engineer
+
+<a href="https://www.linkedin.com/in/hafsa-anwar-53b251313"><img src="https://img.shields.io/badge/LinkedIn-57534E?style=flat-square&logo=linkedin&logoColor=F5F1EA" alt="LinkedIn"/></a>
+<a href="https://github.com/Hafsa-Anwar65"><img src="https://img.shields.io/badge/GitHub-2B2A28?style=flat-square&logo=github&logoColor=F5F1EA" alt="GitHub"/></a>
+
+<sub>If this project is useful to you, consider giving it a star.</sub>
+
+</div>

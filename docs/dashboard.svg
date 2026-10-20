@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8A9A82" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#8A9A82" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="sh" x="-5%" y="-5%" width="110%" height="120%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#2B2A28" flood-opacity="0.08"/>
+    </filter>
+    <clipPath id="frame"><rect width="1280" height="760" rx="14"/></clipPath>
+  </defs>
+  <g clip-path="url(#frame)">
+  <rect width="1280" height="760" fill="#F5F1EA"/>
+
+  <!-- Sidebar -->
+  <rect width="220" height="760" fill="#2B2A28"/>
+  <rect x="28" y="30" width="28" height="28" rx="7" fill="#8A9A82"/>
+  <path d="M35 50 L41 42 L46 47 L51 38" stroke="#F5F1EA" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="66" y="50" fill="#F5F1EA" font-size="15" font-weight="600">Cost Monitor</text>
+  <text x="28" y="100" fill="#A8A29E" font-size="11" letter-spacing="1.2">WORKSPACE</text>
+  <rect x="16" y="114" width="188" height="36" rx="8" fill="#57534E"/>
+  <rect x="16" y="120" width="3" height="24" rx="1.5" fill="#C2A878"/>
+  <text x="36" y="137" fill="#F5F1EA" font-size="14" font-weight="500">Overview</text>
+  <text x="36" y="177" fill="#D6CFC4" font-size="14">Requests</text>
+  <text x="36" y="213" fill="#D6CFC4" font-size="14">Models</text>
+  <text x="36" y="249" fill="#D6CFC4" font-size="14">Budgets</text>
+  <text x="36" y="285" fill="#D6CFC4" font-size="14">Settings</text>
+  <rect x="16" y="684" width="188" height="52" rx="10" fill="#3A3835"/>
+  <circle cx="38" cy="710" r="5" fill="#8A9A82"/>
+  <text x="52" y="706" fill="#F5F1EA" font-size="13" font-weight="500">Proxy online</text>
+  <text x="52" y="723" fill="#A8A29E" font-size="11">localhost:8000</text>
+
+  <!-- Header -->
+  <text x="256" y="58" fill="#2B2A28" font-size="24" font-weight="600">Overview</text>
+  <text x="256" y="82" fill="#78716C" font-size="13">Last 7 days  ·  sample data</text>
+  <rect x="1067" y="38" width="180" height="34" rx="8" fill="#FFFFFF" stroke="#D6CFC4"/>
+  <text x="1083" y="60" fill="#57534E" font-size="13">Oct 13 – Oct 19, 2026</text>
+
+  <!-- KPI cards -->
+  <g filter="url(#sh)">
+    <rect x="256" y="108" width="233" height="104" rx="12" fill="#FFFFFF"/>
+    <rect x="509" y="108" width="233" height="104" rx="12" fill="#FFFFFF"/>
+    <rect x="762" y="108" width="233" height="104" rx="12" fill="#FFFFFF"/>
+    <rect x="1015" y="108" width="232" height="104" rx="12" fill="#FFFFFF"/>
+  </g>
+  <text x="276" y="138" fill="#78716C" font-size="13">Total spend</text>
+  <text x="276" y="178" fill="#2B2A28" font-size="30" font-weight="600">$48.62</text>
+  <text x="276" y="199" fill="#6B7D63" font-size="12">▲ 12.4% vs last week</text>
+  <text x="529" y="138" fill="#78716C" font-size="13">Requests</text>
+  <text x="529" y="178" fill="#2B2A28" font-size="30" font-weight="600">12,480</text>
+  <text x="529" y="199" fill="#6B7D63" font-size="12">▲ 8.1% vs last week</text>
+  <text x="782" y="138" fill="#78716C" font-size="13">Avg latency</text>
+  <text x="782" y="178" fill="#2B2A28" font-size="30" font-weight="600">842 ms</text>
+  <text x="782" y="199" fill="#A0784A" font-size="12">p95 1.9 s</text>
+  <text x="1035" y="138" fill="#78716C" font-size="13">Tokens processed</text>
+  <text x="1035" y="178" fill="#2B2A28" font-size="30" font-weight="600">9.1M</text>
+  <text x="1035" y="199" fill="#78716C" font-size="12">7.4M in  ·  1.7M out</text>
+
+  <!-- Spend over time -->
+  <rect x="256" y="232" width="620" height="284" rx="12" fill="#FFFFFF" filter="url(#sh)"/>
+  <text x="276" y="264" fill="#2B2A28" font-size="15" font-weight="600">Spend over time</text>
+  <text x="856" y="264" fill="#78716C" font-size="12" text-anchor="end">USD per day</text>
+  <g stroke="#EDE8DF" stroke-width="1">
+    <line x1="306" y1="290" x2="856" y2="290"/>
+    <line x1="306" y1="353" x2="856" y2="353"/>
+    <line x1="306" y1="416" x2="856" y2="416"/>
+    <line x1="306" y1="480" x2="856" y2="480"/>
+  </g>
+  <g fill="#A8A29E" font-size="11" text-anchor="end">
+    <text x="296" y="294">$10</text><text x="296" y="357">$6.6</text><text x="296" y="420">$3.3</text><text x="296" y="484">$0</text>
+  </g>
+  <path d="M306 383 L398 360 L489 370 L581 330 L673 353 L764 320 L856 322 L856 480 L306 480 Z" fill="url(#area)"/>
+  <path d="M306 383 L398 360 L489 370 L581 330 L673 353 L764 320 L856 322" fill="none" stroke="#6B7D63" stroke-width="2.5" stroke-linejoin="round"/>
+  <g fill="#FFFFFF" stroke="#6B7D63" stroke-width="2">
+    <circle cx="306" cy="383" r="3.5"/><circle cx="398" cy="360" r="3.5"/><circle cx="489" cy="370" r="3.5"/>
+    <circle cx="581" cy="330" r="3.5"/><circle cx="673" cy="353" r="3.5"/><circle cx="764" cy="320" r="3.5"/><circle cx="856" cy="322" r="3.5"/>
+  </g>
+  <g fill="#78716C" font-size="11" text-anchor="middle">
+    <text x="306" y="502">Mon</text><text x="398" y="502">Tue</text><text x="489" y="502">Wed</text><text x="581" y="502">Thu</text>
+    <text x="673" y="502">Fri</text><text x="764" y="502">Sat</text><text x="856" y="502">Sun</text>
+  </g>
+
+  <!-- Cost by model -->
+  <rect x="896" y="232" width="351" height="284" rx="12" fill="#FFFFFF" filter="url(#sh)"/>
+  <text x="916" y="264" fill="#2B2A28" font-size="15" font-weight="600">Cost by model</text>
+  <g font-size="13">
+    <text x="916" y="304" fill="#57534E">gpt-4o</text>
+    <text x="1227" y="304" fill="#2B2A28" text-anchor="end" font-weight="500">$21.40</text>
+    <rect x="916" y="314" width="311" height="10" rx="5" fill="#EDE8DF"/>
+    <rect x="916" y="314" width="311" height="10" rx="5" fill="#57534E"/>
+    <text x="916" y="358" fill="#57534E">claude-sonnet</text>
+    <text x="1227" y="358" fill="#2B2A28" text-anchor="end" font-weight="500">$14.10</text>
+    <rect x="916" y="368" width="311" height="10" rx="5" fill="#EDE8DF"/>
+    <rect x="916" y="368" width="205" height="10" rx="5" fill="#8A9A82"/>
+    <text x="916" y="412" fill="#57534E">gemini-flash</text>
+    <text x="1227" y="412" fill="#2B2A28" text-anchor="end" font-weight="500">$7.85</text>
+    <rect x="916" y="422" width="311" height="10" rx="5" fill="#EDE8DF"/>
+    <rect x="916" y="422" width="114" height="10" rx="5" fill="#C2A878"/>
+    <text x="916" y="466" fill="#57534E">gpt-4o-mini</text>
+    <text x="1227" y="466" fill="#2B2A28" text-anchor="end" font-weight="500">$5.27</text>
+    <rect x="916" y="476" width="311" height="10" rx="5" fill="#EDE8DF"/>
+    <rect x="916" y="476" width="77" height="10" rx="5" fill="#A8A29E"/>
+  </g>
+
+  <!-- Recent requests -->
+  <rect x="256" y="536" width="991" height="200" rx="12" fill="#FFFFFF" filter="url(#sh)"/>
+  <text x="276" y="568" fill="#2B2A28" font-size="15" font-weight="600">Recent requests</text>
+  <text x="1227" y="568" fill="#6B7D63" font-size="12" text-anchor="end">View all</text>
+  <rect x="266" y="584" width="971" height="30" rx="6" fill="#F5F1EA"/>
+  <g fill="#78716C" font-size="11" letter-spacing="0.8">
+    <text x="280" y="603">TIME</text><text x="400" y="603">MODEL</text><text x="580" y="603">TOKENS IN / OUT</text>
+    <text x="780" y="603">COST</text><text x="900" y="603">LATENCY</text><text x="1040" y="603">STATUS</text>
+  </g>
+  <g fill="#2B2A28" font-size="13">
+    <text x="280" y="645">21:42:08</text><text x="400" y="645">gpt-4o</text><text x="580" y="645">1,204 / 386</text><text x="780" y="645">$0.0069</text><text x="900" y="645">1,120 ms</text>
+    <text x="280" y="681">21:41:55</text><text x="400" y="681">claude-sonnet</text><text x="580" y="681">842 / 210</text><text x="780" y="681">$0.0057</text><text x="900" y="681">930 ms</text>
+    <text x="280" y="717">21:41:31</text><text x="400" y="717">gemini-flash</text><text x="580" y="717">2,310 / 512</text><text x="780" y="717">$0.0003</text><text x="900" y="717">410 ms</text>
+  </g>
+  <line x1="276" y1="660" x2="1227" y2="660" stroke="#EDE8DF"/>
+  <line x1="276" y1="696" x2="1227" y2="696" stroke="#EDE8DF"/>
+  <g font-size="11" font-weight="600">
+    <rect x="1040" y="630" width="48" height="22" rx="11" fill="#E4EAE0"/><text x="1064" y="645" fill="#4F6148" text-anchor="middle">200</text>
+    <rect x="1040" y="666" width="48" height="22" rx="11" fill="#E4EAE0"/><text x="1064" y="681" fill="#4F6148" text-anchor="middle">200</text>
+    <rect x="1040" y="702" width="48" height="22" rx="11" fill="#F1E7D6"/><text x="1064" y="717" fill="#8A6435" text-anchor="middle">429</text>
+  </g>
+  </g>
+</svg>
